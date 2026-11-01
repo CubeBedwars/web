@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bedwars Studio — Voxel 3D Sandbox, Modes, Multiplayer & AI</title>
+  <meta name="description" content="Next-gen 3D Voxel Bedwars Studio. Play Solo vs Tactical AI, host serverless WebRTC Multiplayer, build custom maps in the 3D Voxel Studio, and experience Rush & Lucky Block modes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="theme-cyber">
+  <div id="app">
+    <!-- 3D WebGL Canvas Layer -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Crosshair Overlay -->
+    <div id="crosshair" class="hidden">
+      <div class="ch-center"></div>
+      <div class="ch-line ch-top"></div>
+      <div class="ch-line ch-bottom"></div>
+      <div class="ch-line ch-left"></div>
+      <div class="ch-line ch-right"></div>
+    </div>
+
+    <!-- Screen Vignette & Damage Flash -->
+    <div id="damage-flash"></div>
+    <div id="vignette"></div>
+
+    <!-- HUD Layer -->
+    <div id="hud" class="hud-container hidden">
+      <!-- Top Bed Status Bar -->
+      <div id="hud-team-tracker" class="glass-card tracker-card">
+        <!-- Team badges populated dynamically -->
+      </div>
+
+      <!-- Top Right Match Info & Scoreboard -->
+      <div id="hud-scoreboard" class="glass-card scoreboard-card">
+        <div class="sb-header">
+          <span class="sb-title">BEDWARS STUDIO</span>
+          <span id="sb-mode-badge" class="badge-mode">SOLO</span>
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-stats">
+          <div class="sb-row"><span>Kills:</span> <span id="stat-kills" class="val-gold">0</span></div>
+          <div class="sb-row"><span>Final Kills:</span> <span id="stat-final-kills" class="val-gold">0</span></div>
+          <div class="sb-row"><span>Beds Broken:</span> <span id="stat-beds" class="val-gold">0</span></div>
+          <div class="sb-row"><span>Time:</span> <span id="stat-timer" class="val-cyan">00:00</span></div>
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-footer">
+          <span id="sb-net-status">Single Player (AI)</span>
+        </div>
+      </div>
+
+      <!-- Center Event Banner Announcement -->
+      <div id="announcement-banner" class="announcement hidden">
+        <h2 id="announce-title">RED BED DESTROYED!</h2>
+        <p id="announce-subtitle">Destroyed by You!</p>
+      </div>
+
+      <!-- Bottom Center Player Status Bar & Hotbar -->
+      <div class="hud-bottom-center">
+        <!-- Resource Counters (Iron, Gold, Diamond, Emerald) -->
+        <div class="resource-bar glass-card">
+          <div class="res-item res-iron"><span class="res-icon">⚪</span> <span id="res-iron-val">0</span></div>
+          <div class="res-item res-gold"><span class="res-icon">🟡</span> <span id="res-gold-val">0</span></div>
+          <div class="res-item res-diamond"><span class="res-icon">💎</span> <span id="res-dia-val">0</span></div>
+          <div class="res-item res-emerald"><span class="res-icon">🟢</span> <span id="res-eme-val">0</span></div>
+        </div>
+
+        <!-- Health and Armor Meters -->
+        <div class="vitals-row">
+          <div id="health-hearts" class="hearts-container">
+            <!-- 10 hearts dynamically rendered -->
+          </div>
+          <div id="armor-display" class="armor-badge">
+            <span class="armor-icon">🛡️</span>
+            <span id="armor-name">None</span>
+          </div>
+        </div>
+
+        <!-- 9-Slot Hotbar -->
+        <div id="hotbar" class="hotbar-container glass-card">
+          <!-- 9 hotbar slots -->
+          <div class="slot active" data-index="0"><span class="slot-num">1</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="1"><span class="slot-num">2</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="2"><span class="slot-num">3</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="3"><span class="slot-num">4</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="4"><span class="slot-num">5</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="5"><span class="slot-num">6</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="6"><span class="slot-num">7</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="7"><span class="slot-num">8</span><div class="slot-content"></div></div>
+          <div class="slot" data-index="8"><span class="slot-num">9</span><div class="slot-content"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Respawn / Spectator Overlay -->
+    <div id="respawn-overlay" class="modal-backdrop hidden">
+      <div class="respawn-box glass-card glow-red">
+        <h1 class="respawn-title">YOU DIED!</h1>
+        <p class="respawn-desc" id="respawn-sub">Your bed is alive! Respawning in...</p>
+        <div class="respawn-countdown" id="respawn-timer-val">3</div>
+      </div>
+    </div>
+
+    <!-- Victory / Defeat Game Over Overlay -->
+    <div id="gameover-overlay" class="modal-backdrop hidden">
+      <div class="gameover-box glass-card glow-cyan">
+        <h1 id="gameover-title" class="title-victory">VICTORY!</h1>
+        <p id="gameover-subtitle" class="sub-victory">Team Red has conquered the sky islands!</p>
+        <div class="gameover-stats">
+          <div class="stat-box"><span class="lbl">Kills</span><span id="gov-kills" class="val">0</span></div>
+          <div class="stat-box"><span class="lbl">Final Kills</span><span id="gov-final-kills" class="val">0</span></div>
+          <div class="stat-box"><span class="lbl">Beds Broken</span><span id="gov-beds" class="val">0</span></div>
+        </div>
+        <div class="gameover-actions">
+          <button id="btn-gov-rematch" class="btn btn-primary">Play Again</button>
+          <button id="btn-gov-menu" class="btn btn-secondary">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shopkeeper Modal UI -->
+    <div id="shop-modal" class="modal-backdrop hidden">
+      <div class="shop-window glass-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="icon-shop">🛒</span>
+            <h2>ITEM SHOPKEEPER</h2>
+          </div>
+          <button id="btn-close-shop" class="btn-close">✕</button>
+        </div>
+        <!-- Shop Categories Navigation -->
+        <div class="shop-tabs">
+          <button class="shop-tab active" data-tab="blocks">Blocks</button>
+          <button class="shop-tab" data-tab="weapons">Weapons</button>
+          <button class="shop-tab" data-tab="armor">Armor</button>
+          <button class="shop-tab" data-tab="tools">Tools</button>
+          <button class="shop-tab" data-tab="ranged">Ranged</button>
+          <button class="shop-tab" data-tab="utility">Utility</button>
+        </div>
+        <!-- Items Grid -->
+        <div id="shop-items-grid" class="shop-items-grid">
+          <!-- Populated by ShopUI.js -->
+        </div>
+        <div class="shop-footer">
+          <div class="currency-status">
+            <span>Your Resources: </span>
+            <span class="badge-res">⚪ <b id="shop-user-iron">0</b></span>
+            <span class="badge-res">🟡 <b id="shop-user-gold">0</b></span>
+            <span class="badge-res">💎 <b id="shop-user-dia">0</b></span>
+            <span class="badge-res">🟢 <b id="shop-user-eme">0</b></span>
+          </div>
+          <span class="shop-hint">Press <b>ESC</b> or <b>B</b> to close</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Upgrades Modal UI -->
+    <div id="upgrades-modal" class="modal-backdrop hidden">
+      <div class="upgrades-window glass-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="icon-upgrade">⭐</span>
+            <h2>TEAM UPGRADES & TRAPS</h2>
+          </div>
+          <button id="btn-close-upgrades" class="btn-close">✕</button>
+        </div>
+        <div id="upgrades-grid" class="upgrades-grid">
+          <!-- Populated by UpgradesUI.js -->
+        </div>
+        <div class="shop-footer">
+          <div class="currency-status">
+            <span>Team Diamonds Available: </span>
+            <span class="badge-res">💎 <b id="upgrades-user-dia">0</b></span>
+          </div>
+          <span class="shop-hint">Press <b>ESC</b> to close</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bedwars Studio (3D Map Editor) Toolbar & Inspector -->
+    <div id="studio-toolbar" class="studio-ui hidden">
+      <div class="studio-topbar glass-card">
+        <div class="studio-brand">
+          <span class="brand-badge">STUDIO</span>
+          <span class="brand-title">3D Voxel Map Maker</span>
+        </div>
+        <div class="studio-actions">
+          <button id="btn-studio-test" class="btn btn-primary btn-sm">▶ Test Play Map</button>
+          <button id="btn-studio-export" class="btn btn-secondary btn-sm">💾 Export JSON</button>
+          <button id="btn-studio-import" class="btn btn-secondary btn-sm">📂 Import JSON</button>
+          <input type="file" id="studio-file-input" accept=".json" class="hidden">
+          <button id="btn-studio-clear" class="btn btn-danger btn-sm">🗑 Clear World</button>
+          <button id="btn-studio-exit" class="btn btn-secondary btn-sm">✕ Exit</button>
+        </div>
+      </div>
+
+      <!-- Studio Tool Selector -->
+      <div class="studio-palette glass-card">
+        <div class="palette-group">
+          <span class="palette-lbl">Tool:</span>
+          <button class="palette-btn active" data-tool="place" title="Place Voxel">🧱 Place</button>
+          <button class="palette-btn" data-tool="erase" title="Erase Voxel">🧽 Erase</button>
+          <button class="palette-btn" data-tool="box" title="Box Fill">📦 Box</button>
+        </div>
+        <div class="palette-divider"></div>
+        <div class="palette-group">
+          <span class="palette-lbl">Brush Size:</span>
+          <button class="size-btn active" data-size="1">1x1</button>
+          <button class="size-btn" data-size="3">3x3</button>
+          <button class="size-btn" data-size="5">5x5</button>
+        </div>
+        <div class="palette-divider"></div>
+        <div class="palette-group">
+          <span class="palette-lbl">Block:</span>
+          <div id="studio-block-picker" class="block-picker">
+            <!-- Dynamically populated with block types -->
+          </div>
+        </div>
+        <div class="palette-divider"></div>
+        <div class="palette-group">
+          <span class="palette-lbl">Entities:</span>
+          <button class="entity-btn" data-entity="bed_red">🛏 Red Bed</button>
+          <button class="entity-btn" data-entity="bed_blue">🛏 Blue Bed</button>
+          <button class="entity-btn" data-entity="gen_forge">⚙ Team Forge</button>
+          <button class="entity-btn" data-entity="gen_diamond">💎 Diamond Gen</button>
+          <button class="entity-btn" data-entity="gen_emerald">🟢 Emerald Gen</button>
+          <button class="entity-btn" data-entity="npc_shop">🛒 Shopkeeper</button>
+          <button class="entity-btn" data-entity="npc_upgrade">⭐ Upgrade NPC</button>
+        </div>
+      </div>
+
+      <!-- Flycam Controls Info -->
+      <div class="studio-hints glass-card">
+        <span><b>WASD</b>: Fly | <b>Space/Shift</b>: Up/Down | <b>Right-Click</b>: Place | <b>Left-Click</b>: Break | <b>F</b>: Toggle Fly Speed</span>
+      </div>
+    </div>
+
+    <!-- Main Menu Screen -->
+    <div id="main-menu" class="menu-overlay">
+      <div class="menu-container">
+        <!-- Hero Title -->
+        <div class="hero-brand">
+          <div class="hero-tag">NEXT-GEN VOXEL ENGINE</div>
+          <h1 class="hero-title">BEDWARS <span class="gradient-text">STUDIO</span></h1>
+          <p class="hero-subtitle">Voxel Sky Wars with Autonomous AI, WebRTC Multiplayer & 3D Map Maker</p>
+        </div>
+
+        <!-- Main Mode Selection Cards -->
+        <div class="menu-cards-grid">
+          <!-- Card 1: Single Player AI -->
+          <div class="menu-card glow-blue" id="card-singleplayer">
+            <div class="card-icon">🤖</div>
+            <div class="card-content">
+              <h3>Single Player (vs AI)</h3>
+              <p>Battle against tactical autonomous bots that harvest forge, upgrade gear, bridge chasms, and break beds.</p>
+              <div class="card-badges">
+                <span class="badge">Solo</span>
+                <span class="badge">Doubles</span>
+                <span class="badge">4v4</span>
+                <span class="badge">Custom AI</span>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-block" id="btn-play-ai">Play Solo vs AI</button>
+          </div>
+
+          <!-- Card 2: Serverless Multiplayer -->
+          <div class="menu-card glow-green" id="card-multiplayer">
+            <div class="card-icon">🌐</div>
+            <div class="card-content">
+              <h3>Multiplayer (WebRTC P2P)</h3>
+              <p>Zero-server hosting natively built for Netlify. Host a room or join instantly via shareable room code.</p>
+              <div class="card-badges">
+                <span class="badge">Room Codes</span>
+                <span class="badge">No Server Cost</span>
+                <span class="badge">P2P Mesh</span>
+              </div>
+            </div>
+            <div class="card-btn-row">
+              <button class="btn btn-primary" id="btn-host-multi">Host Room</button>
+              <button class="btn btn-secondary" id="btn-join-multi">Join Room</button>
+            </div>
+          </div>
+
+          <!-- Card 3: Bedwars Studio (3D Map Editor) -->
+          <div class="menu-card glow-purple" id="card-studio">
+            <div class="card-icon">🛠️</div>
+            <div class="card-content">
+              <h3>Bedwars Studio (3D Editor)</h3>
+              <p>Sculpt sky islands, position beds, tune generator timers, place NPCs, and export your creations to JSON.</p>
+              <div class="card-badges">
+                <span class="badge">Voxel Sculptor</span>
+                <span class="badge">Export/Import</span>
+                <span class="badge">1-Click Test</span>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-block" id="btn-open-studio">Launch Studio</button>
+          </div>
+        </div>
+
+        <!-- Extra Modes Selector Row -->
+        <div class="modes-strip glass-card">
+          <div class="strip-header">
+            <span>Special Game Modes:</span>
+          </div>
+          <div class="strip-buttons">
+            <button class="mode-pill active" data-mode="solo">Classic Solo</button>
+            <button class="mode-pill" data-mode="doubles">Doubles</button>
+            <button class="mode-pill" data-mode="teams4">4v4v4v4</button>
+            <button class="mode-pill" data-mode="rush">⚡ Rush Bedwars</button>
+            <button class="mode-pill" data-mode="lucky">🍀 Lucky Block</button>
+            <button class="mode-pill" data-mode="void">🌋 Void Rising</button>
+            <button class="mode-pill" data-mode="lunar">🌙 Lunar Low-Gravity</button>
+            <button class="mode-pill" data-mode="chaos">🎲 Chaos Events</button>
+          </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="menu-footer">
+          <span>Target: Netlify & GitHub Export • Three.js Voxel Engine • WebRTC P2P</span>
+          <div class="controls-hint">
+            <span>Controls: <b>WASD</b> Move • <b>Space</b> Jump • <b>Left Click</b> Attack/Break • <b>Right Click</b> Place • <b>B / E</b> Shop</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiplayer Host/Join Modal -->
+    <div id="multiplayer-modal" class="modal-backdrop hidden">
+      <div class="lobby-window glass-card">
+        <div class="modal-header">
+          <h2 id="lobby-title">MULTIPLAYER LOBBY</h2>
+          <button id="btn-close-lobby" class="btn-close">✕</button>
+        </div>
+
+        <div id="lobby-host-view" class="lobby-section">
+          <div class="room-code-display">
+            <span class="lbl">YOUR ROOM CODE:</span>
+            <div class="code-box">
+              <span id="display-room-code" class="code-text">CREATING...</span>
+              <button id="btn-copy-code" class="btn btn-sm btn-secondary">📋 Copy</button>
+              <button id="btn-copy-link" class="btn btn-sm btn-secondary">🔗 Copy Link</button>
+            </div>
+          </div>
+          <div class="connected-peers">
+            <h3>Connected Players (<span id="peer-count">1</span>/8)</h3>
+            <div id="peers-list" class="peers-list">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+          <div class="lobby-actions">
+            <button id="btn-start-multi-match" class="btn btn-primary btn-lg">Start Match</button>
+          </div>
+        </div>
+
+        <div id="lobby-join-view" class="lobby-section hidden">
+          <p class="join-prompt">Enter the Room Code provided by the host to connect via WebRTC:</p>
+          <div class="join-input-group">
+            <input type="text" id="input-join-code" placeholder="e.g. BW-7X9K" maxlength="16">
+            <button id="btn-connect-room" class="btn btn-primary">Connect</button>
+          </div>
+          <div id="join-status-msg" class="status-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

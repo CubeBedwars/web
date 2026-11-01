@@ -1,0 +1,19 @@
+{
+  "name": "cubebedwars-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CubeBedwars Web Client — 3D Voxel Bedwars with Serverless WebRTC Multiplayer & Tactical AI",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.170.0",
+    "peerjs": "^1.5.4"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

@@ -1,99 +1,46 @@
 import { BLOCK_TYPES } from '../engine/VoxelWorld.js';
 
-export const SHOP_CATEGORIES = [
-  { id: 'blocks', name: 'Blocks' },
-  { id: 'weapons', name: 'Weapons' },
-  { id: 'armor', name: 'Armor' },
-  { id: 'tools', name: 'Tools' },
-  { id: 'ranged', name: 'Ranged' },
-  { id: 'utility', name: 'Utility' },
-];
-
 export const SHOP_ITEMS = [
   // --- BLOCKS ---
   {
-    id: 'wool',
-    name: 'Team Wool',
+    id: 'wool_16',
+    name: 'Team Wool (x16)',
     category: 'blocks',
-    currency: 'iron',
+    costType: 'iron',
     cost: 4,
-    count: 16,
     icon: '🧶',
-    desc: 'Basic building block. Colored to your team.',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.WOOL_RED, // adjusted per player team
+    desc: 'Basic building blocks for bridging and bed defense.',
+    action: (player) => player.addItem({ type: 'block', blockType: player.teamWoolType, count: 16, name: 'Wool' })
   },
   {
-    id: 'wood',
-    name: 'Oak Wood',
+    id: 'wood_16',
+    name: 'Oak Wood (x16)',
     category: 'blocks',
-    currency: 'gold',
+    costType: 'gold',
     cost: 4,
-    count: 16,
     icon: '🪵',
-    desc: 'Axe required to break quickly. Good bed defense.',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.WOOD,
+    desc: 'Sturdy wooden planks resistant to pickaxes and basic tools.',
+    action: (player) => player.addItem({ type: 'block', blockType: BLOCK_TYPES.WOOD, count: 16, name: 'Wood Planks' })
   },
   {
-    id: 'end_stone',
-    name: 'End Stone',
+    id: 'end_stone_12',
+    name: 'End Stone (x12)',
     category: 'blocks',
-    currency: 'iron',
+    costType: 'iron',
     cost: 24,
-    count: 12,
     icon: '🪨',
-    desc: 'High blast resistance. Pickaxe required.',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.END_STONE,
+    desc: 'High blast resistance, perfect layer over wooden bed defense.',
+    action: (player) => player.addItem({ type: 'block', blockType: BLOCK_TYPES.END_STONE, count: 12, name: 'End Stone' })
   },
   {
-    id: 'glass',
-    name: 'Blast-Proof Glass',
+    id: 'obsidian_4',
+    name: 'Obsidian (x4)',
     category: 'blocks',
-    currency: 'iron',
-    cost: 12,
-    count: 4,
-    icon: '🪟',
-    desc: 'Immune to TNT and fireball explosions!',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.GLASS,
-  },
-  {
-    id: 'obsidian',
-    name: 'Obsidian',
-    category: 'blocks',
-    currency: 'emerald',
+    costType: 'emerald',
     cost: 4,
-    count: 4,
     icon: '⬛',
-    desc: 'Ultimate defense. Requires diamond pickaxe to break.',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.OBSIDIAN,
-  },
-  {
-    id: 'trampoline',
-    name: 'Trampoline Block',
-    category: 'blocks',
-    currency: 'iron',
-    cost: 8,
-    count: 4,
-    icon: '🟣',
-    desc: 'Bounces players high into the air upon landing.',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.TRAMPOLINE,
-  },
-  {
-    id: 'lucky_block',
-    name: 'Lucky Block',
-    category: 'blocks',
-    currency: 'iron',
-    cost: 16,
-    count: 1,
-    icon: '🍀',
-    desc: 'Break to trigger random loot, traps, or wild surprises!',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.LUCKY_BLOCK,
+    desc: 'Immune to explosions! Can only be mined with a Diamond Pickaxe.',
+    action: (player) => player.addItem({ type: 'block', blockType: BLOCK_TYPES.OBSIDIAN, count: 4, name: 'Obsidian' })
   },
 
   // --- WEAPONS ---
@@ -101,91 +48,73 @@ export const SHOP_ITEMS = [
     id: 'stone_sword',
     name: 'Stone Sword',
     category: 'weapons',
-    currency: 'iron',
+    costType: 'iron',
     cost: 10,
-    count: 1,
     icon: '🗡️',
-    desc: '+5 Damage. Reliable early weapon.',
-    itemType: 'weapon',
-    damage: 5,
+    desc: 'Deals 5 HP damage (+1 with Team Sharpness).',
+    action: (player) => player.setWeapon('stone_sword', 5)
   },
   {
     id: 'iron_sword',
     name: 'Iron Sword',
     category: 'weapons',
-    currency: 'gold',
+    costType: 'gold',
     cost: 7,
-    count: 1,
     icon: '⚔️',
-    desc: '+6 Damage. Standard battle weapon.',
-    itemType: 'weapon',
-    damage: 6,
+    desc: 'Deals 6.5 HP damage (+1 with Team Sharpness).',
+    action: (player) => player.setWeapon('iron_sword', 6.5)
   },
   {
     id: 'diamond_sword',
     name: 'Diamond Sword',
     category: 'weapons',
-    currency: 'emerald',
+    costType: 'emerald',
     cost: 4,
-    count: 1,
-    icon: '💠',
-    desc: '+7.5 Damage. Deadly forged blade.',
-    itemType: 'weapon',
-    damage: 7.5,
+    icon: '💎⚔️',
+    desc: 'Deals 8.5 HP damage (+1 with Team Sharpness).',
+    action: (player) => player.setWeapon('diamond_sword', 8.5)
   },
   {
-    id: 'kb_stick',
-    name: 'Knockback Stick',
+    id: 'knockback_stick',
+    name: 'Stick of Knockback',
     category: 'weapons',
-    currency: 'gold',
+    costType: 'gold',
     cost: 5,
-    count: 1,
-    icon: '🥢',
-    desc: 'Sends opponents flying into the void!',
-    itemType: 'weapon',
-    knockback: 18.0,
-    damage: 2,
+    icon: '🪄',
+    desc: 'Launches enemies off bridges and into the void!',
+    action: (player) => player.setWeapon('knockback_stick', 2, 22) // high knockback
   },
 
   // --- ARMOR ---
   {
-    id: 'armor_chain',
+    id: 'armor_chainmail',
     name: 'Chainmail Armor',
     category: 'armor',
-    currency: 'iron',
-    cost: 40,
-    count: 1,
+    costType: 'iron',
+    cost: 24,
     icon: '⛓️',
-    desc: 'Permanent upgrade. Reduces damage by 20%.',
-    itemType: 'armor',
-    tier: 'chainmail',
-    defense: 20,
+    desc: 'Reduces incoming combat damage by 20%.',
+    action: (player) => player.setArmor('chainmail', 0.20)
   },
   {
     id: 'armor_iron',
     name: 'Iron Armor',
     category: 'armor',
-    currency: 'gold',
+    costType: 'gold',
     cost: 12,
-    count: 1,
     icon: '🛡️',
-    desc: 'Permanent upgrade. Reduces damage by 40%.',
-    itemType: 'armor',
-    tier: 'iron',
-    defense: 40,
+    desc: 'Reduces incoming combat damage by 35%.',
+    action: (player) => player.setArmor('iron', 0.35)
   },
   {
     id: 'armor_diamond',
     name: 'Diamond Armor',
     category: 'armor',
-    currency: 'emerald',
+    costType: 'emerald',
     cost: 6,
-    count: 1,
-    icon: '💎',
-    desc: 'Permanent upgrade. Reduces damage by 60%.',
-    itemType: 'armor',
-    tier: 'diamond',
-    defense: 60,
+    icon: '💎🛡️',
+    desc: 'Reduces incoming combat damage by 50%.',
+    action: (player) => player.setArmor('diamond', 0.50)
   },
 
   // --- TOOLS ---
@@ -193,61 +122,31 @@ export const SHOP_ITEMS = [
     id: 'shears',
     name: 'Permanent Shears',
     category: 'tools',
-    currency: 'iron',
+    costType: 'iron',
     cost: 20,
-    count: 1,
     icon: '✂️',
-    desc: 'Cuts wool blocks almost instantly.',
-    itemType: 'tool',
-    toolType: 'shears',
+    desc: 'Breaks wool blocks instantly.',
+    action: (player) => player.setTool('shears', 4.0)
   },
   {
-    id: 'pickaxe_wood',
-    name: 'Wooden Pickaxe',
+    id: 'iron_pickaxe',
+    name: 'Iron Pickaxe',
     category: 'tools',
-    currency: 'iron',
-    cost: 10,
-    count: 1,
+    costType: 'iron',
+    cost: 20,
     icon: '⛏️',
-    desc: 'Breaks stone and endstone blocks.',
-    itemType: 'tool',
-    toolType: 'pickaxe',
+    desc: 'Efficiently breaks stone, end stone, and ores.',
+    action: (player) => player.setTool('pickaxe', 3.0)
   },
   {
-    id: 'axe_wood',
-    name: 'Wooden Axe',
+    id: 'diamond_pickaxe',
+    name: 'Diamond Pickaxe',
     category: 'tools',
-    currency: 'iron',
-    cost: 10,
-    count: 1,
-    icon: '🪓',
-    desc: 'Breaks wooden defenses quickly.',
-    itemType: 'tool',
-    toolType: 'axe',
-  },
-
-  // --- RANGED ---
-  {
-    id: 'bow',
-    name: 'Standard Bow',
-    category: 'ranged',
-    currency: 'gold',
-    cost: 12,
-    count: 1,
-    icon: '🏹',
-    desc: 'Long-range weapon for sniping bridge builders.',
-    itemType: 'bow',
-  },
-  {
-    id: 'arrow',
-    name: 'Arrows (x8)',
-    category: 'ranged',
-    currency: 'gold',
-    cost: 2,
-    count: 8,
-    icon: '🎯',
-    desc: 'Ammunition for your bow.',
-    itemType: 'arrow',
+    costType: 'gold',
+    cost: 6,
+    icon: '💎⛏️',
+    desc: 'Rapidly mines obsidian and hard fortifications.',
+    action: (player) => player.setTool('diamond_pickaxe', 6.0)
   },
 
   // --- UTILITY ---
@@ -255,104 +154,89 @@ export const SHOP_ITEMS = [
     id: 'golden_apple',
     name: 'Golden Apple',
     category: 'utility',
-    currency: 'gold',
+    costType: 'gold',
     cost: 3,
-    count: 1,
     icon: '🍏',
-    desc: 'Instantly restores 4 hearts + gives 10s Absorption.',
-    itemType: 'consumable',
-    effect: 'gapple',
+    desc: 'Instantly grants 6 HP and +2 absorption hearts for 10 seconds.',
+    action: (player) => player.addItem({ type: 'consumable', id: 'gapple', name: 'Golden Apple', count: 1 })
   },
   {
     id: 'fireball',
     name: 'Fireball',
     category: 'utility',
-    currency: 'iron',
+    costType: 'iron',
     cost: 40,
-    count: 1,
     icon: '🔥',
-    desc: 'Right-click to launch explosive fireball with knockback!',
-    itemType: 'projectile',
-    projectileType: 'fireball',
+    desc: 'Right-click to launch an explosive fireball that shatters bridges!',
+    action: (player) => player.addItem({ type: 'projectile', id: 'fireball', name: 'Fireball', count: 1 })
   },
   {
     id: 'tnt',
-    name: 'TNT',
+    name: 'TNT Explosive',
     category: 'utility',
-    currency: 'gold',
+    costType: 'gold',
     cost: 4,
-    count: 1,
     icon: '🧨',
-    desc: 'Explodes after 3 seconds, tearing through defenses.',
-    itemType: 'block',
-    blockType: BLOCK_TYPES.TNT_BLOCK,
-  },
-  {
-    id: 'ender_pearl',
-    name: 'Ender Pearl',
-    category: 'utility',
-    currency: 'emerald',
-    cost: 4,
-    count: 1,
-    icon: '🔮',
-    desc: 'Teleports you to wherever it impacts!',
-    itemType: 'projectile',
-    projectileType: 'pearl',
-  },
-  {
-    id: 'grappling_hook',
-    name: 'Grappling Hook',
-    category: 'utility',
-    currency: 'emerald',
-    cost: 2,
-    count: 1,
-    icon: '🪝',
-    desc: 'Launch a hook to swing across sky voids!',
-    itemType: 'grapple',
-  },
-  {
-    id: 'rocket_launcher',
-    name: 'Voxel Rocket Launcher',
-    category: 'utility',
-    currency: 'emerald',
-    cost: 6,
-    count: 1,
-    icon: '🚀',
-    desc: 'Fires high-velocity explosive rockets.',
-    itemType: 'projectile',
-    projectileType: 'rocket',
+    desc: 'Placeable block that detonates after 3 seconds, blowing up defenses.',
+    action: (player) => player.addItem({ type: 'block', blockType: BLOCK_TYPES.TNT, name: 'TNT', count: 1 })
   },
 ];
 
-export class ShopManager {
-  static getItemsByCategory(category) {
-    return SHOP_ITEMS.filter(item => item.category === category);
-  }
-
-  static getItemById(id) {
-    return SHOP_ITEMS.find(item => item.id === id);
-  }
-
-  static canAfford(player, item) {
-    const cur = item.currency;
-    return player.resources[cur] >= item.cost;
-  }
-
-  static purchase(player, item) {
-    if (!this.canAfford(player, item)) {
-      return { success: false, reason: 'Not enough resources!' };
-    }
-
-    player.resources[item.currency] -= item.cost;
-
-    // Apply purchase effect
-    if (item.itemType === 'armor') {
-      player.armorTier = item.tier;
-      player.armorDefense = item.defense;
-    } else {
-      player.inventory.addItem(item);
-    }
-
-    return { success: true, item };
-  }
-}
+export const TEAM_UPGRADES = [
+  {
+    id: 'sharpness',
+    name: 'Sharpened Swords',
+    cost: 4,
+    icon: '⚔️✨',
+    desc: 'All team swords deal +1 extra damage permanently.',
+    apply: (team) => { team.upgrades.sharpness = 1; }
+  },
+  {
+    id: 'protection_1',
+    name: 'Reinforced Armor I',
+    cost: 2,
+    icon: '🛡️I',
+    desc: 'Reduces damage taken by team members by an extra 10%.',
+    apply: (team) => { team.upgrades.protection = 1; }
+  },
+  {
+    id: 'protection_2',
+    name: 'Reinforced Armor II',
+    cost: 4,
+    icon: '🛡️II',
+    desc: 'Reduces damage taken by team members by an extra 20%.',
+    apply: (team) => { team.upgrades.protection = 2; }
+  },
+  {
+    id: 'forge_2',
+    name: 'Iron Forge (Tier II)',
+    cost: 2,
+    icon: '🏭II',
+    desc: 'Increases team forge generator spawn speed by 50%.',
+    apply: (team) => { team.upgrades.forgeTier = 1.5; }
+  },
+  {
+    id: 'forge_3',
+    name: 'Golden Forge (Tier III)',
+    cost: 4,
+    icon: '🏭III',
+    desc: 'Increases team forge generator spawn speed by 100% and adds emeralds.',
+    apply: (team) => { team.upgrades.forgeTier = 2.0; }
+  },
+  {
+    id: 'heal_pool',
+    name: 'Heal Pool',
+    cost: 1,
+    icon: '💖',
+    desc: 'Provides continuous health regeneration while on your team island.',
+    apply: (team) => { team.upgrades.healPool = true; }
+  },
+  {
+    id: 'alarm_trap',
+    name: 'Alarm Trap',
+    cost: 1,
+    icon: '🚨',
+    desc: 'Sounds a loud alarm when an enemy invades your base island.',
+    apply: (team) => { team.upgrades.alarmTrap = true; }
+  },
+];

@@ -1,20 +1,20 @@
 import * as THREE from 'three';
 import { Player } from './Player.js';
-import { BLOCK_TYPES, BLOCK_PROPERTIES } from '../engine/VoxelWorld.js';
+import { BLOCK_TYPES, BLOCK_PROPS } from '../engine/VoxelWorld.js';
 
 export class LocalPlayer extends Player {
-  constructor(id, name, teamId, camera, domElement) {
-    super(id, name, teamId, true);
+  constructor(id, name, team, camera, canvas) {
+    super(id, name, team, true);
     this.camera = camera;
-    this.domElement = domElement;
+    this.canvas = canvas;
 
-    // Camera angles
-    this.pitch = 0;
-    this.yaw = 0;
-    this.mouseSensitivity = 0.0022;
+    // First person head bob & swing
+    this.walkCycle = 0;
+    this.isSwinging = false;
+    this.swingProgress = 0;
 
-    // Movement state
-    this.input = {
+    // Keys state
+    this.keys = {
       forward: false,
       backward: false,
       left: false,
@@ -23,133 +23,79 @@ export class LocalPlayer extends Player {
       sprint: false,
     };
 
-    // First person arm / held item mesh
-    this.heldItemGroup = new THREE.Group();
-    this.initHeldItem();
-    this.camera.add(this.heldItemGroup);
+    // Block mining state
+    this.isMining = false;
+    this.miningProgress = 0;
+    this.currentMiningPos = null;
 
-    // Swing animation
-    this.swingProgress = 0;
-    this.isSwinging = false;
-
-    // Walk bobbing
-    this.bobTimer = 0;
-
-    // Bind event listeners
+    // Setup input listeners
     this.initControls();
+    this.createArmMesh();
   }
 
-  initHeldItem() {
-    this.heldItemMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.14, 0.45, 0.14),
-      new THREE.MeshLambertMaterial({ color: 0xa06d40 }) // wooden sword default
-    );
-    this.heldItemMesh.position.set(0.35, -0.32, -0.55);
-    this.heldItemMesh.rotation.set(0.2, -0.3, 0.4);
-    this.heldItemGroup.add(this.heldItemMesh);
-  }
-
-  updateHeldItemVisual() {
-    const item = this.getActiveItem();
-    if (!item) {
-      this.heldItemMesh.visible = false;
-      return;
-    }
-    this.heldItemMesh.visible = true;
-
-    if (item.itemType === 'block') {
-      this.heldItemMesh.geometry.dispose();
-      this.heldItemMesh.geometry = new THREE.BoxGeometry(0.25, 0.25, 0.25);
-      const prop = BLOCK_PROPERTIES[item.blockType];
-      this.heldItemMesh.material.color.setHex(prop ? prop.color : 0xffffff);
-    } else {
-      this.heldItemMesh.geometry.dispose();
-      this.heldItemMesh.geometry = new THREE.BoxGeometry(0.12, 0.5, 0.12);
-      if (item.id.includes('diamond')) {
-        this.heldItemMesh.material.color.setHex(0x00f0ff);
-      } else if (item.id.includes('iron')) {
-        this.heldItemMesh.material.color.setHex(0xdddddd);
-      } else if (item.id.includes('stone')) {
-        this.heldItemMesh.material.color.setHex(0x888888);
-      } else {
-        this.heldItemMesh.material.color.setHex(0xa06d40);
-      }
-    }
+  createArmMesh() {
+    this.armGroup = new THREE.Group();
+    // Voxel sword / arm mesh
+    const armGeo = new THREE.BoxGeometry(0.18, 0.5, 0.18);
+    const armMat = new THREE.MeshLambertMaterial({ color: 0xef4444 });
+    const arm = new THREE.Mesh(armGeo, armMat);
+    arm.position.set(0.35, -0.3, -0.6);
+    arm.rotation.set(0.4, -0.2, 0.1);
+    this.armGroup.add(arm);
+    this.camera.add(this.armGroup);
   }
 
   initControls() {
-    // Pointer Lock
-    this.domElement.addEventListener('click', () => {
-      if (document.pointerLockElement !== this.domElement && this.isAlive) {
-        this.domElement.requestPointerLock();
+    // Mouse Pointer Lock
+    this.canvas.addEventListener('click', () => {
+      if (!document.pointerLockElement) {
+        this.canvas.requestPointerLock();
       }
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (document.pointerLockElement === this.domElement) {
-        this.yaw -= e.movementX * this.mouseSensitivity;
-        this.pitch -= e.movementY * this.mouseSensitivity;
-
-        // Clamp pitch to prevent flipping
-        const maxPitch = Math.PI / 2 - 0.05;
-        this.pitch = Math.max(-maxPitch, Math.min(maxPitch, this.pitch));
+      if (document.pointerLockElement === this.canvas) {
+        const sens = 0.0022;
+        this.yaw -= e.movementX * sens;
+        this.pitch -= e.movementY * sens;
+        this.pitch = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, this.pitch));
       }
     });
 
+    // Keyboard bindings
     window.addEventListener('keydown', (e) => {
-      if (document.activeElement.tagName === 'INPUT') return; // chat/input typing
-
       switch (e.code) {
-        case 'KeyW': this.input.forward = true; break;
-        case 'KeyS': this.input.backward = true; break;
-        case 'KeyA': this.input.left = true; break;
-        case 'KeyD': this.input.right = true; break;
-        case 'Space': this.input.jump = true; break;
+        case 'KeyW': this.keys.forward = true; break;
+        case 'KeyS': this.keys.backward = true; break;
+        case 'KeyA': this.keys.left = true; break;
+        case 'KeyD': this.keys.right = true; break;
+        case 'Space': this.keys.jump = true; break;
         case 'ShiftLeft':
-        case 'ShiftRight':
-          this.isSprinting = true;
-          break;
-        case 'Digit1': this.setActiveSlot(0); break;
-        case 'Digit2': this.setActiveSlot(1); break;
-        case 'Digit3': this.setActiveSlot(2); break;
-        case 'Digit4': this.setActiveSlot(3); break;
-        case 'Digit5': this.setActiveSlot(4); break;
-        case 'Digit6': this.setActiveSlot(5); break;
-        case 'Digit7': this.setActiveSlot(6); break;
-        case 'Digit8': this.setActiveSlot(7); break;
-        case 'Digit9': this.setActiveSlot(8); break;
+        case 'ShiftRight': this.keys.sprint = true; break;
+        // Hotbar selection 1-9
+        case 'Digit1': this.selectedSlot = 0; break;
+        case 'Digit2': this.selectedSlot = 1; break;
+        case 'Digit3': this.selectedSlot = 2; break;
+        case 'Digit4': this.selectedSlot = 3; break;
+        case 'Digit5': this.selectedSlot = 4; break;
+        case 'Digit6': this.selectedSlot = 5; break;
+        case 'Digit7': this.selectedSlot = 6; break;
+        case 'Digit8': this.selectedSlot = 7; break;
+        case 'Digit9': this.selectedSlot = 8; break;
       }
     });
 
     window.addEventListener('keyup', (e) => {
       switch (e.code) {
-        case 'KeyW': this.input.forward = false; break;
-        case 'KeyS': this.input.backward = false; break;
-        case 'KeyA': this.input.left = false; break;
-        case 'KeyD': this.input.right = false; break;
-        case 'Space': this.input.jump = false; break;
+        case 'KeyW': this.keys.forward = false; break;
+        case 'KeyS': this.keys.backward = false; break;
+        case 'KeyA': this.keys.left = false; break;
+        case 'KeyD': this.keys.right = false; break;
+        case 'Space': this.keys.jump = false; break;
         case 'ShiftLeft':
-        case 'ShiftRight':
-          this.isSprinting = false;
-          break;
+        case 'ShiftRight': this.keys.sprint = false; break;
       }
     });
-
-    // Mouse wheel hotbar switching
-    window.addEventListener('wheel', (e) => {
-      if (document.pointerLockElement === this.domElement) {
-        let newSlot = this.activeSlotIndex + (e.deltaY > 0 ? 1 : -1);
-        if (newSlot < 0) newSlot = 8;
-        if (newSlot > 8) newSlot = 0;
-        this.setActiveSlot(newSlot);
-      }
-    });
-  }
-
-  setActiveSlot(index) {
-    this.activeSlotIndex = index;
-    this.updateHeldItemVisual();
-    if (this.onSlotChange) this.onSlotChange(index);
   }
 
   triggerSwing() {
@@ -157,44 +103,71 @@ export class LocalPlayer extends Player {
     this.swingProgress = 0;
   }
 
-  update(delta) {
-    if (!this.isAlive) return;
+  update(dt, physics) {
+    if (this.isDead) return;
 
-    // Update Camera position (Eye height: 1.62)
+    // 1. Calculate intended movement direction based on camera yaw
+    const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
+    const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
+
+    const moveDir = new THREE.Vector3();
+    if (this.keys.forward) moveDir.add(forward);
+    if (this.keys.backward) moveDir.sub(forward);
+    if (this.keys.right) moveDir.add(right);
+    if (this.keys.left) moveDir.sub(right);
+
+    if (moveDir.lengthSq() > 0.001) {
+      moveDir.normalize();
+      const speed = this.keys.sprint ? 7.2 : 4.8;
+      this.velocity.x = moveDir.x * speed;
+      this.velocity.z = moveDir.z * speed;
+      if (this.onGround) this.walkCycle += dt * (this.keys.sprint ? 14 : 10);
+    }
+
+    // 2. Jumping
+    if (this.keys.jump && this.onGround) {
+      this.velocity.y = 8.5;
+      this.onGround = false;
+    }
+
+    // 3. Apply physics
+    physics.moveEntity(this, dt);
+
+    // 4. Update Camera position & rotation
+    const bobOffset = Math.sin(this.walkCycle) * 0.04;
     this.camera.position.set(
       this.position.x,
-      this.position.y + 1.62,
+      this.position.y + 1.62 + (this.onGround ? bobOffset : 0),
       this.position.z
     );
 
-    // Apply Camera rotations
-    this.camera.rotation.set(0, 0, 0);
-    this.camera.rotation.y = this.yaw;
-    this.camera.rotation.x = this.pitch;
+    const euler = new THREE.Euler(this.pitch, this.yaw, 0, 'YXZ');
+    this.camera.quaternion.setFromEuler(euler);
 
-    // Swing animation
+    // 5. Weapon swing animation
     if (this.isSwinging) {
-      this.swingProgress += delta * 12.0;
-      const angle = Math.sin(this.swingProgress * Math.PI) * 0.7;
-      this.heldItemMesh.rotation.x = 0.2 + angle;
-      this.heldItemMesh.position.z = -0.55 + Math.sin(this.swingProgress * Math.PI) * 0.15;
-
-      if (this.swingProgress >= 1.0) {
+      this.swingProgress += dt * 8.0;
+      if (this.swingProgress >= Math.PI) {
         this.isSwinging = false;
-        this.heldItemMesh.rotation.set(0.2, -0.3, 0.4);
-        this.heldItemMesh.position.set(0.35, -0.32, -0.55);
+        this.swingProgress = 0;
+        this.armGroup.rotation.set(0, 0, 0);
+      } else {
+        this.armGroup.rotation.x = Math.sin(this.swingProgress) * 0.8;
+        this.armGroup.rotation.y = -Math.sin(this.swingProgress) * 0.4;
       }
     }
+  }
 
-    // Walking bobbing animation
-    const isMoving = this.input.forward || this.input.backward || this.input.left || this.input.right;
-    if (isMoving && this.onGround) {
-      this.bobTimer += delta * (this.isSprinting ? 14 : 9);
-      const bobY = Math.sin(this.bobTimer) * 0.04;
-      const bobX = Math.cos(this.bobTimer * 0.5) * 0.03;
-      this.heldItemGroup.position.set(bobX, bobY, 0);
-    } else {
-      this.heldItemGroup.position.set(0, 0, 0);
+  getSelectedItem() {
+    return this.hotbar[this.selectedSlot] || null;
+  }
+
+  consumeSelectedItem() {
+    const item = this.getSelectedItem();
+    if (!item) return;
+    item.count--;
+    if (item.count <= 0) {
+      this.hotbar[this.selectedSlot] = null;
     }
   }
 }

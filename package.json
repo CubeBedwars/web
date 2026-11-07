@@ -1,9 +1,9 @@
 {
-  "name": "cubebedwars-web",
+  "name": "voxel-bedwars",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "CubeBedwars Web Client — 3D Voxel Bedwars with Serverless WebRTC Multiplayer & Tactical AI",
+  "description": "Next-Gen 3D Voxel Bedwars Studio — Standalone Voxel Engine, AI Bots, Serverless WebRTC Multiplayer & Map Maker",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

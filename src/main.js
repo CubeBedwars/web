@@ -1,157 +1,152 @@
 import { GameManager } from './game/GameManager.js';
+import { BLOCK_TYPES } from './engine/VoxelWorld.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const game = new GameManager();
 
-  let selectedMode = 'solo';
-
-  // 1. Mode Selector Pills
-  const modePills = document.querySelectorAll('.mode-pill');
-  modePills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      modePills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      selectedMode = pill.dataset.mode;
-    });
+  // 1. Main Menu Play Actions
+  document.getElementById('btn-play-solo')?.addEventListener('click', () => {
+    game.startMatch('solo', true);
   });
 
-  // 2. Play Solo vs AI
-  document.getElementById('btn-play-ai')?.addEventListener('click', () => {
-    game.sound.init();
-    game.sound.resume();
-    game.isMultiplayer = false;
-    game.startMatch(selectedMode, true);
+  document.getElementById('btn-play-rush')?.addEventListener('click', () => {
+    game.mapPreset.generators.forEach(g => { g.interval /= 2; });
+    game.startMatch('rush', true);
   });
 
-  // 3. Launch Bedwars Studio (3D Map Editor)
+  document.getElementById('btn-play-lucky')?.addEventListener('click', () => {
+    // Generate extra lucky blocks on center island
+    game.startMatch('lucky', true);
+    for (let x = -4; x <= 4; x += 2) {
+      for (let z = -4; z <= 4; z += 2) {
+        if (Math.random() > 0.5) {
+          game.world.setBlock(x, 21, z, BLOCK_TYPES.LUCKY_BLOCK);
+        }
+      }
+    }
+    game.world.rebuildMeshes();
+  });
+
+  // 2. Open Bedwars Studio (3D Map Editor)
   document.getElementById('btn-open-studio')?.addEventListener('click', () => {
     game.sound.init();
     game.sound.resume();
     game.studioEditor.open();
   });
 
-  // 4. Multiplayer Modal & Actions
-  const multiModal = document.getElementById('multiplayer-modal');
-  const hostView = document.getElementById('lobby-host-view');
-  const joinView = document.getElementById('lobby-join-view');
-  const roomCodeDisplay = document.getElementById('display-room-code');
-  const peerCountEl = document.getElementById('peer-count');
-  const peersListEl = document.getElementById('peers-list');
-
-  // Host Room Button
-  document.getElementById('btn-host-multi')?.addEventListener('click', () => {
-    game.sound.init();
-    game.sound.resume();
-    multiModal.classList.remove('hidden');
-    hostView.classList.remove('hidden');
-    joinView.classList.add('hidden');
-    roomCodeDisplay.innerText = 'CREATING...';
-
-    game.network.createRoom((roomCode) => {
-      roomCodeDisplay.innerText = roomCode;
-      updatePeerList();
-    }, (err) => {
-      alert('Failed to initialize WebRTC Peer: ' + err.message);
+  // 3. Studio Toolbar Controls
+  document.querySelectorAll('.studio-block-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.studio-block-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const bType = parseInt(btn.dataset.block);
+      game.studioEditor.selectedBlock = bType;
+      game.studioEditor.entityToPlace = null;
+      game.studioEditor.brushMode = 'single';
     });
   });
 
-  // Join Room Button
-  document.getElementById('btn-join-multi')?.addEventListener('click', () => {
-    game.sound.init();
-    game.sound.resume();
-    multiModal.classList.remove('hidden');
-    hostView.classList.add('hidden');
-    joinView.classList.remove('hidden');
+  document.querySelectorAll('.studio-tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.studio-tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tool = btn.dataset.tool;
+      if (tool === 'erase') {
+        game.studioEditor.brushMode = 'erase';
+        game.studioEditor.entityToPlace = null;
+      } else if (tool === '3x3') {
+        game.studioEditor.brushMode = '3x3';
+        game.studioEditor.entityToPlace = null;
+      } else if (tool === 'single') {
+        game.studioEditor.brushMode = 'single';
+        game.studioEditor.entityToPlace = null;
+      }
+    });
   });
 
-  // Connect Button in Join View
-  document.getElementById('btn-connect-room')?.addEventListener('click', () => {
-    const inputCode = document.getElementById('input-join-code').value.trim();
-    const statusMsg = document.getElementById('join-status-msg');
+  document.querySelectorAll('.studio-entity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.studio-entity-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      game.studioEditor.entityToPlace = btn.dataset.entity;
+    });
+  });
 
-    if (!inputCode) {
-      statusMsg.innerText = 'Please enter a valid room code!';
-      statusMsg.style.color = '#ff3366';
+  document.getElementById('btn-studio-export')?.addEventListener('click', () => {
+    game.studioEditor.exportMapJSON();
+  });
+
+  document.getElementById('btn-studio-import')?.addEventListener('click', () => {
+    document.getElementById('studio-file-input')?.click();
+  });
+
+  document.getElementById('studio-file-input')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => game.studioEditor.importMapJSON(ev.target.result);
+      reader.readAsText(file);
+    }
+  });
+
+  document.getElementById('btn-studio-test')?.addEventListener('click', () => {
+    game.studioEditor.testPlay();
+  });
+
+  document.getElementById('btn-studio-exit')?.addEventListener('click', () => {
+    game.studioEditor.close();
+    document.getElementById('main-menu')?.classList.remove('hidden');
+    document.getElementById('crosshair')?.classList.add('hidden');
+  });
+
+  // 4. Multiplayer Modal Actions
+  const multiModal = document.getElementById('multiplayer-modal');
+  const roomCodeDisplay = document.getElementById('display-room-code');
+
+  document.getElementById('btn-open-multi')?.addEventListener('click', () => {
+    multiModal.classList.remove('hidden');
+  });
+
+  document.getElementById('btn-close-multi')?.addEventListener('click', () => {
+    multiModal.classList.add('hidden');
+  });
+
+  document.getElementById('btn-host-room')?.addEventListener('click', () => {
+    roomCodeDisplay.innerText = 'GENERATING ROOM...';
+    game.network.createRoom((code) => {
+      roomCodeDisplay.innerText = `ROOM CODE: ${code}`;
+      alert(`Room Created! Share code: ${code}`);
+      multiModal.classList.add('hidden');
+      game.startMatch('solo', false); // Start without bots, waiting for players
+    }, (err) => {
+      alert('Error creating WebRTC Peer: ' + err.message);
+    });
+  });
+
+  document.getElementById('btn-join-room')?.addEventListener('click', () => {
+    const code = document.getElementById('input-room-code')?.value.trim();
+    if (!code) {
+      alert('Please enter a valid room code!');
       return;
     }
-
-    statusMsg.innerText = 'Connecting via WebRTC...';
-    statusMsg.style.color = '#00f0ff';
-
-    game.network.joinRoom(inputCode, () => {
-      statusMsg.innerText = 'Connected! Entering match...';
-      statusMsg.style.color = '#00f59b';
-      game.isMultiplayer = true;
-      setTimeout(() => {
-        multiModal.classList.add('hidden');
-        game.startMatch('solo', false); // client joins host without local bots
-      }, 1000);
+    game.network.joinRoom(code, () => {
+      alert(`Connected to Room ${code}!`);
+      multiModal.classList.add('hidden');
+      game.startMatch('solo', false);
     }, (err) => {
-      statusMsg.innerText = 'Connection error: ' + err.message;
-      statusMsg.style.color = '#ff3366';
+      alert('Failed to connect to room: ' + err.message);
     });
   });
 
-  // Copy Room Code & Link
-  document.getElementById('btn-copy-code')?.addEventListener('click', () => {
-    const code = roomCodeDisplay.innerText;
-    navigator.clipboard.writeText(code);
-    alert(`Room Code copied: ${code}`);
+  // 5. Game Over Rematch Actions
+  document.getElementById('btn-gameover-rematch')?.addEventListener('click', () => {
+    document.getElementById('gameover-overlay')?.classList.add('hidden');
+    game.startMatch('solo', true);
   });
 
-  document.getElementById('btn-copy-link')?.addEventListener('click', () => {
-    const code = roomCodeDisplay.innerText;
-    const link = `${window.location.origin}${window.location.pathname}#room=${code}`;
-    navigator.clipboard.writeText(link);
-    alert(`Invite link copied to clipboard!\n${link}`);
+  document.getElementById('btn-gameover-menu')?.addEventListener('click', () => {
+    document.getElementById('gameover-overlay')?.classList.add('hidden');
+    game.hud.hide();
+    document.getElementById('main-menu')?.classList.remove('hidden');
   });
-
-  // Start Multiplayer Match Button (Host only)
-  document.getElementById('btn-start-multi-match')?.addEventListener('click', () => {
-    game.isMultiplayer = true;
-    multiModal.classList.add('hidden');
-    game.startMatch(selectedMode, false);
-  });
-
-  // Close Lobby Modal
-  document.getElementById('btn-close-lobby')?.addEventListener('click', () => {
-    multiModal.classList.add('hidden');
-  });
-
-  // Rematch and Main Menu from Game Over
-  document.getElementById('btn-gov-rematch')?.addEventListener('click', () => {
-    game.startMatch(selectedMode, !game.isMultiplayer);
-  });
-
-  document.getElementById('btn-gov-menu')?.addEventListener('click', () => {
-    game.openMainMenu();
-  });
-
-  function updatePeerList() {
-    if (!peersListEl) return;
-    peersListEl.innerHTML = '';
-    const peers = game.network.connectedPeers;
-    peerCountEl.innerText = peers.length;
-
-    for (const p of peers) {
-      const row = document.createElement('div');
-      row.className = 'peer-row';
-      row.innerHTML = `
-        <span><b>${p.name}</b> ${p.isHost ? '(Host)' : ''}</span>
-        <span class="badge" style="color: #00f0ff">Connected</span>
-      `;
-      peersListEl.appendChild(row);
-    }
-  }
-
-  // Auto-connect if URL contains hash e.g. #room=BW-XXXX
-  if (window.location.hash.includes('room=')) {
-    const match = window.location.hash.match(/room=([A-Za-z0-9-]+)/);
-    if (match && match[1]) {
-      const roomCode = match[1];
-      document.getElementById('input-join-code').value = roomCode;
-      document.getElementById('btn-join-multi')?.click();
-      document.getElementById('btn-connect-room')?.click();
-    }
-  }
 });

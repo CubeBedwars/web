@@ -78,9 +78,13 @@ export class BotBrain {
     // Attack if close enough
     if (dist <= 2.8 && this.attackCooldown <= 0) {
       this.attackCooldown = 0.6;
-      target.takeDamage(this.bot.weapon.damage || 4.0, this.bot, gm.physics);
-      if (gm.sound) gm.sound.playHit();
-      gm.particles.spawnHitSparks(target.position);
+      let dmg = this.bot.weapon?.damage || 4.0;
+      if (gm?.mutationManager && typeof gm.mutationManager.onDamage === 'function') {
+        dmg = gm.mutationManager.onDamage(this.bot, target, dmg, gm);
+      }
+      target.takeDamage(dmg, this.bot, gm?.physics, gm?.teamManager);
+      if (gm?.sound) gm.sound.playHit?.();
+      if (gm?.particles) gm.particles.spawnHitSparks?.(target.position);
     }
   }
 

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Voxel BedWars Studio</title>
   <meta name="description" content="Next-Gen 3D Voxel BedWars Studio. High-performance voxel rendering, tactical autonomous AI bots, map maker studio, and serverless WebRTC multiplayer.">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -43,18 +44,28 @@
       <div id="hud-scoreboard" class="glass-card scoreboard-card">
         <div class="sb-header">
           <span class="sb-title">VOXEL BEDWARS</span>
-          <span class="badge-mode">SOLO</span>
+          <span id="sb-mode-badge" class="badge-mode">SOLO</span>
         </div>
+        <div id="hud-net-badge" class="badge-net-status net-offline" style="display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-top:4px;background:rgba(148,163,184,0.1);color:#94a3b8;">
+          <span class="net-status-dot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;"></span>
+          <span id="hud-net-text">Solo (Offline)</span>
+        </div>
+        <div class="sb-divider"></div>
+        <div class="sb-section-title">TEAM BEDS</div>
+        <div id="sb-team-beds" class="sb-team-beds-list"></div>
         <div class="sb-divider"></div>
         <div class="sb-stats">
           <div class="sb-row"><span>Kills:</span> <span id="stat-kills" class="val-gold">0</span></div>
           <div class="sb-row"><span>Final Kills:</span> <span id="stat-final-kills" class="val-gold">0</span></div>
           <div class="sb-row"><span>Beds Broken:</span> <span id="stat-beds" class="val-gold">0</span></div>
+          <div class="sb-row"><span>Rank Rating:</span> <span id="stat-rating" class="val-cyan">1000 RR</span></div>
+          <div class="sb-row"><span>Player Level:</span> <span id="stat-level" class="val-gold">Lv. 1</span></div>
           <div class="sb-row"><span>Time:</span> <span id="stat-timer" class="val-cyan">00:00</span></div>
         </div>
         <div class="sb-divider"></div>
-        <div class="sb-footer">
-          <span>Press [E] for Shop | [U] for Upgrades</span>
+        <div class="sb-footer" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>[E] Shop | [U] Upgrades</span>
+          <button id="btn-toggle-touch" class="btn-touch-toggle" title="Toggle On-Screen Touch Controls">📱 Touch</button>
         </div>
       </div>
 
@@ -79,6 +90,47 @@
 
         <!-- 9-Slot Hotbar -->
         <div id="hotbar" class="hotbar-container glass-card"></div>
+      </div>
+    </div>
+
+    <!-- Responsive Mobile Touch Controls Overlay -->
+    <div id="touch-controls" class="touch-overlay hidden">
+      <!-- Movement Joystick Zone (Bottom-Left) -->
+      <div id="touch-joystick-zone" class="touch-joystick-zone">
+        <div id="touch-joystick-base" class="touch-joystick-base">
+          <div id="touch-joystick-thumb" class="touch-joystick-thumb"></div>
+        </div>
+      </div>
+
+      <!-- Camera Look Drag Zone (Right Half) -->
+      <div id="touch-look-zone" class="touch-look-zone"></div>
+
+      <!-- Floating Action Buttons Cluster (Bottom-Right) -->
+      <div id="touch-action-cluster" class="touch-action-cluster">
+        <button id="btn-touch-jump" class="touch-btn touch-btn-jump" aria-label="Jump" title="Jump (Space)">
+          <span class="touch-btn-icon">⏫</span>
+          <span class="touch-btn-label">JUMP</span>
+        </button>
+        <button id="btn-touch-attack" class="touch-btn touch-btn-attack" aria-label="Attack / Mine" title="Attack / Mine (Left Click)">
+          <span class="touch-btn-icon">⚔️</span>
+          <span class="touch-btn-label">MINE</span>
+        </button>
+        <button id="btn-touch-place" class="touch-btn touch-btn-place" aria-label="Place / Use" title="Place / Use (Right Click)">
+          <span class="touch-btn-icon">🧱</span>
+          <span class="touch-btn-label">PLACE</span>
+        </button>
+        <button id="btn-touch-sneak" class="touch-btn touch-btn-sneak" aria-label="Sneak Toggle" title="Sneak (Shift)">
+          <span class="touch-btn-icon">🚶</span>
+          <span class="touch-btn-label">SNEAK</span>
+        </button>
+        <button id="btn-touch-shop" class="touch-btn touch-btn-shop" aria-label="Open Shop" title="Shop (E)">
+          <span class="touch-btn-icon">🛒</span>
+          <span class="touch-btn-label">SHOP</span>
+        </button>
+        <button id="btn-touch-pause" class="touch-btn touch-btn-pause" aria-label="Upgrades / Menu" title="Upgrades (U)">
+          <span class="touch-btn-icon">⚙️</span>
+          <span class="touch-btn-label">UPG</span>
+        </button>
       </div>
     </div>
 
@@ -168,6 +220,12 @@
     <div id="gameover-overlay" class="modal-backdrop hidden">
       <div class="gameover-box glass-card">
         <h1 id="gameover-title" class="title-victory">VICTORY!</h1>
+        <div id="gameover-summary" class="gameover-stats-grid">
+          <div class="go-stat-card"><span class="go-stat-label">Rating Change</span><span id="go-stat-rating" class="go-stat-val val-cyan">+42 RR</span></div>
+          <div class="go-stat-card"><span class="go-stat-label">XP Earned</span><span id="go-stat-xp" class="go-stat-val val-gold">+200 XP</span></div>
+          <div class="go-stat-card"><span class="go-stat-label">Final Kills</span><span id="go-stat-finals" class="go-stat-val">0</span></div>
+          <div class="go-stat-card"><span class="go-stat-label">Beds Broken</span><span id="go-stat-beds" class="go-stat-val">0</span></div>
+        </div>
         <div class="gameover-buttons">
           <button id="btn-gameover-rematch" class="btn-primary">Play Again</button>
           <button id="btn-gameover-menu" class="btn-secondary">Main Menu</button>
@@ -182,6 +240,85 @@
           <div class="brand-badge">NEXT-GEN 3D VOXEL ENGINE</div>
           <h1 class="brand-title">VOXEL <span class="cyan-glow">BEDWARS</span></h1>
           <p class="brand-subtitle">Autonomous AI Bots • 3D Map Studio • WebRTC Multiplayer • Netlify Ready</p>
+        </div>
+
+        <!-- Portal Profile & OAuth Management Card -->
+        <div id="portal-profile-card" class="portal-profile-card glass-card">
+          <div class="portal-profile-left">
+            <img id="portal-avatar" class="portal-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=guest" alt="Avatar">
+            <div class="portal-user-meta">
+              <div class="portal-name-row">
+                <span id="portal-username" class="portal-username">Guest_Player</span>
+                <span id="portal-provider-badge" class="provider-badge provider-guest">GUEST</span>
+              </div>
+              <div class="portal-badges-row">
+                <span id="portal-level-badge" class="badge-level">Lv. 1</span>
+                <span id="portal-rating-val" class="portal-rating">1000 RR</span>
+                <span id="portal-tier-badge" class="badge-tier">🥈 Silver</span>
+              </div>
+              <div class="portal-xp-container">
+                <div class="portal-xp-bar"><div id="portal-xp-bar-fill" class="portal-xp-fill" style="width: 0%;"></div></div>
+                <span id="portal-xp-label" class="portal-xp-label">0 / 100 XP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="portal-profile-stats">
+            <div class="portal-stat-pill"><span class="pill-label">Wins</span><span id="portal-stat-wins" class="pill-val val-gold">0</span></div>
+            <div class="portal-stat-pill"><span class="pill-label">Kills</span><span id="portal-stat-kills" class="pill-val val-cyan">0</span></div>
+            <div class="portal-stat-pill"><span class="pill-label">Beds</span><span id="portal-stat-beds" class="pill-val val-red">0</span></div>
+          </div>
+
+          <div class="portal-auth-section">
+            <div id="portal-auth-actions" class="auth-buttons-group">
+              <button id="btn-auth-github" class="btn-oauth btn-github">
+                <svg class="oauth-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                <span>Login with GitHub</span>
+              </button>
+              <button id="btn-auth-google" class="btn-oauth btn-google">
+                <svg class="oauth-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+                <span>Login with Google</span>
+              </button>
+            </div>
+            <div id="portal-auth-logged" class="auth-logged-group hidden">
+              <button id="btn-auth-logout" class="btn-secondary btn-small">Sign Out</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Match Format Selector Bar -->
+        <div class="format-selector-section glass-card">
+          <div class="format-header">
+            <h3>SELECT MATCH FORMAT</h3>
+            <span class="ranked-notice">⭐ Official Ranked 2-Team Matches affect Numerical Rank Rating</span>
+          </div>
+          <div class="format-buttons-grid">
+            <button id="btn-format-1v1" class="btn-format-card format-ranked">
+              <div class="format-badge">RANKED</div>
+              <div class="format-title">1v1 DUEL</div>
+              <div class="format-desc">2-Team Colosseum</div>
+            </button>
+            <button id="btn-format-duos" class="btn-format-card format-ranked">
+              <div class="format-badge">RANKED</div>
+              <div class="format-title">2v2 DUOS</div>
+              <div class="format-desc">2 Teams of 2</div>
+            </button>
+            <button id="btn-format-trios" class="btn-format-card format-ranked">
+              <div class="format-badge">RANKED</div>
+              <div class="format-title">3v3 TRIOS</div>
+              <div class="format-desc">2 Teams of 3</div>
+            </button>
+            <button id="btn-format-4v4" class="btn-format-card format-ranked">
+              <div class="format-badge">RANKED</div>
+              <div class="format-title">4v4 SQUAD</div>
+              <div class="format-desc">2 Teams of 4</div>
+            </button>
+            <button id="btn-format-solos" class="btn-format-card">
+              <div class="format-badge unranked">CASUAL</div>
+              <div class="format-title">SOLO (4-TEAM)</div>
+              <div class="format-desc">Speedway 4-Team</div>
+            </button>
+          </div>
         </div>
 
         <div class="menu-cards-grid">
@@ -236,26 +373,55 @@
       </div>
     </div>
 
-    <!-- Multiplayer Host/Join Modal -->
+    <!-- Multiplayer Host/Join & LAN Direct Modal -->
     <div id="multiplayer-modal" class="modal-backdrop hidden">
-      <div class="multi-window glass-card">
+      <div class="multi-window glass-card" style="max-width: 620px;">
         <div class="modal-header">
-          <h2>MULTIPLAYER (WEBRTC P2P)</h2>
+          <div class="modal-title-group" style="display:flex;align-items:center;gap:12px;">
+            <h2>MULTIPLAYER (ONLINE & LAN)</h2>
+            <span id="multi-active-transport" class="badge-mode" style="background:rgba(6,182,212,0.2);color:#22d3ee;border:1px solid rgba(6,182,212,0.4);font-size:11px;padding:3px 8px;border-radius:4px;">Dual-Layer WS/WebRTC</span>
+          </div>
           <button id="btn-close-multi" class="btn-close">✕</button>
         </div>
         <div class="multi-body">
           <div class="multi-choice-box">
-            <h3>HOST A ROOM</h3>
-            <p>Create a serverless match with an instant room code.</p>
+            <h3>HOST ONLINE MATCH</h3>
+            <p>Create a dedicated WebSocket match with automatic WebRTC P2P failover.</p>
             <button id="btn-host-room" class="btn-primary">CREATE ROOM</button>
             <div id="display-room-code" class="room-code-tag"></div>
           </div>
           <div class="multi-divider-v"></div>
           <div class="multi-choice-box">
-            <h3>JOIN A ROOM</h3>
-            <p>Enter your friend's room code to connect directly.</p>
+            <h3>JOIN ONLINE ROOM</h3>
+            <p>Enter 6-character room code to join via dedicated server or WebRTC.</p>
             <input type="text" id="input-room-code" class="input-code" placeholder="BW-XXXX" maxlength="10">
             <button id="btn-join-room" class="btn-secondary">JOIN ROOM</button>
+          </div>
+        </div>
+
+        <div style="width:100%;height:1px;background:rgba(255,255,255,0.1);margin:16px 0;"></div>
+
+        <!-- LAN Direct IP:Port Join Section -->
+        <div class="multi-lan-section" style="display:flex;flex-direction:column;gap:10px;">
+          <h3 style="font-size:14px;color:var(--accent-cyan);font-weight:800;letter-spacing:0.5px;">LOCAL AREA NETWORK (LAN) DIRECT JOIN</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin:0;">Connect directly to a peer or dedicated server on the same Wi-Fi / local subnet without internet access.</p>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="text" id="input-lan-ip" class="input-code" style="flex:2;font-size:14px;" placeholder="192.168.1.100" value="127.0.0.1">
+            <span style="font-weight:700;color:var(--text-muted);">:</span>
+            <input type="number" id="input-lan-port" class="input-code" style="flex:1;max-width:90px;font-size:14px;" placeholder="8080" value="8080" min="1" max="65535">
+            <button id="btn-join-lan" class="btn-primary" style="white-space:nowrap;padding:8px 14px;">CONNECT LAN</button>
+          </div>
+          <div id="lan-status-msg" style="font-size:12px;display:none;padding:6px 10px;border-radius:4px;"></div>
+
+          <!-- Discovered LAN Games Container -->
+          <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px;margin-top:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:var(--accent-gold);margin-bottom:6px;">
+              <span>DISCOVERED LOCAL BEACONS</span>
+              <span id="lan-discovery-count">0 found</span>
+            </div>
+            <div id="lan-games-list" style="display:flex;flex-direction:column;gap:6px;max-height:90px;overflow-y:auto;font-size:12px;color:var(--text-muted);">
+              <div class="lan-empty-hint">Scanning local subnet beacon on port 8766...</div>
+            </div>
           </div>
         </div>
       </div>

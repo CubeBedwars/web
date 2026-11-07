@@ -31,36 +31,47 @@ export const BLOCK_TYPES = {
   BED_HEAD: 22,
   BED_FOOT: 23,
   TNT: 24,
+
+  // Ores
+  IRON_ORE: 25,
+  GOLD_ORE: 26,
+  DIAMOND_ORE: 27,
+  EMERALD_ORE: 28,
 };
 
 export const BLOCK_PROPS = {
   [BLOCK_TYPES.AIR]: { name: 'Air', solid: false, hardness: 0 },
-  [BLOCK_TYPES.BEDROCK]: { name: 'Bedrock', solid: true, hardness: 99999 },
-  [BLOCK_TYPES.STONE]: { name: 'Stone', solid: true, hardness: 1.5, tool: 'pickaxe', tex: 'stone' },
-  [BLOCK_TYPES.DIRT]: { name: 'Dirt', solid: true, hardness: 0.5, tool: 'shovel', tex: 'dirt' },
-  [BLOCK_TYPES.GRASS]: { name: 'Grass', solid: true, hardness: 0.6, tool: 'shovel', tex: 'grass' },
-  [BLOCK_TYPES.WOOD]: { name: 'Oak Wood', solid: true, hardness: 2.0, tool: 'axe', tex: 'wood' },
-  [BLOCK_TYPES.END_STONE]: { name: 'End Stone', solid: true, hardness: 3.0, tool: 'pickaxe', tex: 'end_stone' },
-  [BLOCK_TYPES.OBSIDIAN]: { name: 'Obsidian', solid: true, hardness: 12.0, tool: 'diamond_pickaxe', blastProof: true, tex: 'obsidian' },
-  [BLOCK_TYPES.GLASS]: { name: 'Blast-Proof Glass', solid: true, hardness: 0.3, transparent: true, blastProof: true, tex: 'glass' },
+  [BLOCK_TYPES.BEDROCK]: { name: 'Bedrock', solid: true, hardness: 99999, particleColors: [0x334155, 0x1e293b] },
+  [BLOCK_TYPES.STONE]: { name: 'Stone', solid: true, hardness: 1.5, tool: 'pickaxe', tex: 'stone', particleColors: [0x64748b, 0x475569, 0x94a3b8] },
+  [BLOCK_TYPES.DIRT]: { name: 'Dirt', solid: true, hardness: 0.5, tool: 'shovel', tex: 'dirt', particleColors: [0x78350f, 0x92400e, 0x542308] },
+  [BLOCK_TYPES.GRASS]: { name: 'Grass', solid: true, hardness: 0.6, tool: 'shovel', tex: 'grass', particleColors: [0x4ade80, 0x22c55e, 0x78350f] },
+  [BLOCK_TYPES.WOOD]: { name: 'Oak Wood', solid: true, hardness: 2.0, tool: 'axe', tex: 'wood', particleColors: [0xb45309, 0x78350f, 0xd97706] },
+  [BLOCK_TYPES.END_STONE]: { name: 'End Stone', solid: true, hardness: 3.0, tool: 'pickaxe', tex: 'end_stone', particleColors: [0xfef08a, 0xfde047, 0xca8a04] },
+  [BLOCK_TYPES.OBSIDIAN]: { name: 'Obsidian', solid: true, hardness: 12.0, tool: 'diamond_pickaxe', blastProof: true, tex: 'obsidian', particleColors: [0x1e1b4b, 0x312e81, 0x4338ca, 0x0f0e26] },
+  [BLOCK_TYPES.GLASS]: { name: 'Blast-Proof Glass', solid: true, hardness: 0.3, transparent: true, blastProof: true, tex: 'glass', particleColors: [0xbae6fd, 0xe0f2fe, 0xffffff] },
 
-  [BLOCK_TYPES.WOOL_WHITE]: { name: 'White Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_white' },
-  [BLOCK_TYPES.WOOL_RED]: { name: 'Red Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_red' },
-  [BLOCK_TYPES.WOOL_BLUE]: { name: 'Blue Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_blue' },
-  [BLOCK_TYPES.WOOL_GREEN]: { name: 'Green Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_green' },
-  [BLOCK_TYPES.WOOL_YELLOW]: { name: 'Yellow Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_yellow' },
-  [BLOCK_TYPES.WOOL_AQUA]: { name: 'Aqua Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_aqua' },
-  [BLOCK_TYPES.WOOL_PINK]: { name: 'Pink Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_pink' },
-  [BLOCK_TYPES.WOOL_GRAY]: { name: 'Gray Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_gray' },
+  [BLOCK_TYPES.WOOL_WHITE]: { name: 'White Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_white', particleColors: [0xf8fafc, 0xe2e8f0, 0xcbd5e1] },
+  [BLOCK_TYPES.WOOL_RED]: { name: 'Red Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_red', particleColors: [0xef4444, 0xdc2626, 0xb91c1c] },
+  [BLOCK_TYPES.WOOL_BLUE]: { name: 'Blue Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_blue', particleColors: [0x3b82f6, 0x2563eb, 0x1d4ed8] },
+  [BLOCK_TYPES.WOOL_GREEN]: { name: 'Green Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_green', particleColors: [0x22c55e, 0x16a34a, 0x15803d] },
+  [BLOCK_TYPES.WOOL_YELLOW]: { name: 'Yellow Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_yellow', particleColors: [0xeab308, 0xca8a04, 0xa16207] },
+  [BLOCK_TYPES.WOOL_AQUA]: { name: 'Aqua Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_aqua', particleColors: [0x06b6d4, 0x0891b2, 0x0e7490] },
+  [BLOCK_TYPES.WOOL_PINK]: { name: 'Pink Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_pink', particleColors: [0xec4899, 0xdb2777, 0xbe185d] },
+  [BLOCK_TYPES.WOOL_GRAY]: { name: 'Gray Wool', solid: true, hardness: 0.8, tool: 'shears', tex: 'wool_gray', particleColors: [0x64748b, 0x475569, 0x334155] },
 
-  [BLOCK_TYPES.LUCKY_BLOCK]: { name: 'Lucky Block', solid: true, hardness: 0.6, tex: 'lucky_block', lucky: true },
-  [BLOCK_TYPES.DIAMOND_BLOCK]: { name: 'Diamond Block', solid: true, hardness: 4.0, tool: 'pickaxe', tex: 'diamond_block' },
-  [BLOCK_TYPES.EMERALD_BLOCK]: { name: 'Emerald Block', solid: true, hardness: 4.0, tool: 'pickaxe', tex: 'emerald_block' },
-  [BLOCK_TYPES.GOLD_BLOCK]: { name: 'Gold Block', solid: true, hardness: 2.5, tool: 'pickaxe', tex: 'gold_block' },
-  [BLOCK_TYPES.IRON_BLOCK]: { name: 'Iron Block', solid: true, hardness: 3.5, tool: 'pickaxe', tex: 'iron_block' },
-  [BLOCK_TYPES.BED_HEAD]: { name: 'Bed Head', solid: true, hardness: 1.2, isBed: true, tex: 'bed_head' },
-  [BLOCK_TYPES.BED_FOOT]: { name: 'Bed Foot', solid: true, hardness: 1.2, isBed: true, tex: 'bed_foot' },
-  [BLOCK_TYPES.TNT]: { name: 'TNT', solid: true, hardness: 0.1, tex: 'tnt' },
+  [BLOCK_TYPES.LUCKY_BLOCK]: { name: 'Lucky Block', solid: true, hardness: 0.6, tex: 'lucky_block', lucky: true, particleColors: [0xf59e0b, 0xd97706, 0xffffff] },
+  [BLOCK_TYPES.DIAMOND_BLOCK]: { name: 'Diamond Block', solid: true, hardness: 4.0, tool: 'pickaxe', tex: 'diamond_block', particleColors: [0x25d6ec, 0x57f2ff, 0x0b8296] },
+  [BLOCK_TYPES.EMERALD_BLOCK]: { name: 'Emerald Block', solid: true, hardness: 4.0, tool: 'pickaxe', tex: 'emerald_block', particleColors: [0x10b981, 0x34d399, 0x065f46] },
+  [BLOCK_TYPES.GOLD_BLOCK]: { name: 'Gold Block', solid: true, hardness: 2.5, tool: 'pickaxe', tex: 'gold_block', particleColors: [0xeab308, 0xfacc15, 0xa16207] },
+  [BLOCK_TYPES.IRON_BLOCK]: { name: 'Iron Block', solid: true, hardness: 3.5, tool: 'pickaxe', tex: 'iron_block', particleColors: [0xd1d5db, 0xf3f4f6, 0x9ca3af] },
+  [BLOCK_TYPES.BED_HEAD]: { name: 'Bed Head', solid: true, hardness: 1.2, isBed: true, tex: 'bed_head', particleColors: [0xef4444, 0xf8fafc, 0x78350f] },
+  [BLOCK_TYPES.BED_FOOT]: { name: 'Bed Foot', solid: true, hardness: 1.2, isBed: true, tex: 'bed_foot', particleColors: [0xef4444, 0x78350f] },
+  [BLOCK_TYPES.TNT]: { name: 'TNT', solid: true, hardness: 0.1, tex: 'tnt', particleColors: [0xdc2626, 0xffffff, 0x78350f] },
+
+  [BLOCK_TYPES.IRON_ORE]: { name: 'Iron Ore', solid: true, hardness: 3.0, tool: 'pickaxe', tex: 'iron_ore', particleColors: [0x64748b, 0xd4a373, 0xf4ebe2, 0xc0c0c0] },
+  [BLOCK_TYPES.GOLD_ORE]: { name: 'Gold Ore', solid: true, hardness: 3.0, tool: 'pickaxe', tex: 'gold_ore', particleColors: [0x64748b, 0xfacc15, 0xeab308, 0xfef08a] },
+  [BLOCK_TYPES.DIAMOND_ORE]: { name: 'Diamond Ore', solid: true, hardness: 3.0, tool: 'pickaxe', tex: 'diamond_ore', particleColors: [0x64748b, 0x22d3ee, 0x67e8f9, 0xecfeff] },
+  [BLOCK_TYPES.EMERALD_ORE]: { name: 'Emerald Ore', solid: true, hardness: 3.0, tool: 'pickaxe', tex: 'emerald_ore', particleColors: [0x64748b, 0x34d399, 0x10b981, 0xecfdf5] },
 };
 
 export class VoxelWorld {
@@ -126,6 +137,10 @@ export class VoxelWorld {
           mat.emissive = new THREE.Color(0x003344);
         } else if (id === BLOCK_TYPES.EMERALD_BLOCK) {
           mat.emissive = new THREE.Color(0x003311);
+        } else if (id === BLOCK_TYPES.DIAMOND_ORE) {
+          mat.emissive = new THREE.Color(0x001a24);
+        } else if (id === BLOCK_TYPES.EMERALD_ORE) {
+          mat.emissive = new THREE.Color(0x001f10);
         }
         this.materials.set(id, mat);
       }
@@ -239,48 +254,100 @@ export class VoxelWorld {
     }
   }
 
-  // Fast raycast through voxel grid with DDA (Digital Differential Analyzer)
+  // Amanatides-Woo Fast Integer Voxel DDA (Digital Differential Analyzer)
   raycast(origin, direction, maxDistance = 6) {
-    let t = 0;
-    const step = 0.05;
-    const current = new THREE.Vector3();
-    let prevX = Math.floor(origin.x);
-    let prevY = Math.floor(origin.y);
-    let prevZ = Math.floor(origin.z);
+    if (!direction || direction.lengthSq() === 0) return { hit: false };
 
-    while (t < maxDistance) {
-      current.copy(origin).addScaledVector(direction, t);
-      const bx = Math.floor(current.x);
-      const by = Math.floor(current.y);
-      const bz = Math.floor(current.z);
+    const dir = direction.clone().normalize();
+    const ox = origin.x;
+    const oy = origin.y;
+    const oz = origin.z;
 
-      if (bx !== prevX || by !== prevY || bz !== prevZ) {
-        const type = this.getBlock(bx, by, bz);
-        if (type !== BLOCK_TYPES.AIR) {
-          // Calculate face normal based on previous step
-          const normal = new THREE.Vector3(prevX - bx, prevY - by, prevZ - bz);
-          // Normalize normal to 1 in primary axis
-          if (normal.lengthSq() > 1) {
-            if (Math.abs(normal.x) >= Math.abs(normal.y) && Math.abs(normal.x) >= Math.abs(normal.z)) normal.set(Math.sign(normal.x), 0, 0);
-            else if (Math.abs(normal.y) >= Math.abs(normal.x) && Math.abs(normal.y) >= Math.abs(normal.z)) normal.set(0, Math.sign(normal.y), 0);
-            else normal.set(0, 0, Math.sign(normal.z));
-          }
+    let x = Math.floor(ox);
+    let y = Math.floor(oy);
+    let z = Math.floor(oz);
 
-          return {
-            hit: true,
-            point: current.clone(),
-            blockPos: { x: bx, y: by, z: bz },
-            placePos: { x: bx + normal.x, y: by + normal.y, z: bz + normal.z },
-            normal: normal,
-            type: type,
-            data: this.getBlockData(bx, by, bz)
-          };
+    // Initial check: if ray origin is inside a solid/non-air block
+    const initialType = this.getBlock(x, y, z);
+    if (initialType !== BLOCK_TYPES.AIR) {
+      return {
+        hit: true,
+        point: origin.clone(),
+        blockPos: { x, y, z },
+        placePos: { x, y: y + 1, z },
+        normal: new THREE.Vector3(0, 1, 0),
+        type: initialType,
+        data: this.getBlockData(x, y, z)
+      };
+    }
+
+    const stepX = dir.x > 0 ? 1 : (dir.x < 0 ? -1 : 0);
+    const stepY = dir.y > 0 ? 1 : (dir.y < 0 ? -1 : 0);
+    const stepZ = dir.z > 0 ? 1 : (dir.z < 0 ? -1 : 0);
+
+    const tDeltaX = dir.x !== 0 ? Math.abs(1 / dir.x) : Infinity;
+    const tDeltaY = dir.y !== 0 ? Math.abs(1 / dir.y) : Infinity;
+    const tDeltaZ = dir.z !== 0 ? Math.abs(1 / dir.z) : Infinity;
+
+    let tMaxX = dir.x > 0 ? (Math.floor(ox) + 1 - ox) * tDeltaX : (dir.x < 0 ? (ox - Math.floor(ox)) * tDeltaX : Infinity);
+    let tMaxY = dir.y > 0 ? (Math.floor(oy) + 1 - oy) * tDeltaY : (dir.y < 0 ? (oy - Math.floor(oy)) * tDeltaY : Infinity);
+    let tMaxZ = dir.z > 0 ? (Math.floor(oz) + 1 - oz) * tDeltaZ : (dir.z < 0 ? (oz - Math.floor(oz)) * tDeltaZ : Infinity);
+
+    let normalX = 0;
+    let normalY = 0;
+    let normalZ = 0;
+    let currentDist = 0;
+
+    while (currentDist <= maxDistance) {
+      if (tMaxX < tMaxY) {
+        if (tMaxX < tMaxZ) {
+          x += stepX;
+          currentDist = tMaxX;
+          tMaxX += tDeltaX;
+          normalX = -stepX;
+          normalY = 0;
+          normalZ = 0;
+        } else {
+          z += stepZ;
+          currentDist = tMaxZ;
+          tMaxZ += tDeltaZ;
+          normalX = 0;
+          normalY = 0;
+          normalZ = -stepZ;
         }
-        prevX = bx;
-        prevY = by;
-        prevZ = bz;
+      } else {
+        if (tMaxY < tMaxZ) {
+          y += stepY;
+          currentDist = tMaxY;
+          tMaxY += tDeltaY;
+          normalX = 0;
+          normalY = -stepY;
+          normalZ = 0;
+        } else {
+          z += stepZ;
+          currentDist = tMaxZ;
+          tMaxZ += tDeltaZ;
+          normalX = 0;
+          normalY = 0;
+          normalZ = -stepZ;
+        }
       }
-      t += step;
+
+      if (currentDist > maxDistance) break;
+
+      const type = this.getBlock(x, y, z);
+      if (type !== BLOCK_TYPES.AIR) {
+        const hitPoint = origin.clone().addScaledVector(dir, currentDist);
+        return {
+          hit: true,
+          point: hitPoint,
+          blockPos: { x, y, z },
+          placePos: { x: x + normalX, y: y + normalY, z: z + normalZ },
+          normal: new THREE.Vector3(normalX, normalY, normalZ),
+          type: type,
+          data: this.getBlockData(x, y, z)
+        };
+      }
     }
 
     return { hit: false };

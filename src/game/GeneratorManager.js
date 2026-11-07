@@ -98,7 +98,7 @@ export class GeneratorManager {
           if (dist < 1.0) {
             // Collect into inventory
             p.addResource(item.type, 1);
-            if (p.isLocalPlayer && this.sound) {
+            if ((p.isLocal || p.isLocalPlayer) && this.sound) {
               this.sound.playItemPickup();
             }
             this.scene.remove(item.mesh);

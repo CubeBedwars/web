@@ -1,25 +1,32 @@
 {
-  "appId": "com.bedwars.studio",
-  "appName": "Bedwars Studio",
+  "appId": "io.bedwars.voxel",
+  "appName": "Voxel Bedwars",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "cleartext": true
   },
   "android": {
+    "hardwareAccelerated": true,
     "allowMixedContent": true,
-    "captureInput": true,
-    "backgroundColor": "#0a0c14"
+    "backgroundColor": "#0f172a"
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0f172a",
+    "preferredContentMode": "mobile"
   },
   "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 1500,
-      "backgroundColor": "#0a0c14",
-      "showSpinner": false
+    "ScreenOrientation": {
+      "orientation": "landscape"
     },
     "StatusBar": {
       "style": "DARK",
       "overlaysWebView": true
+    },
+    "Keyboard": {
+      "resize": "body"
     }
   }
 }

@@ -23,6 +23,11 @@ export class LocalPlayer extends Player {
       sprint: false,
     };
 
+    // Touch controls state
+    this.touchMoveVector = { x: 0, y: 0 };
+    this.touchJump = false;
+    this.isSneaking = false;
+
     // Block mining state
     this.isMining = false;
     this.miningProgress = 0;
@@ -96,6 +101,15 @@ export class LocalPlayer extends Player {
         case 'ShiftRight': this.keys.sprint = false; break;
       }
     });
+
+    // Mouse wheel slot scrolling
+    window.addEventListener('wheel', (e) => {
+      if (e.deltaY > 0) {
+        this.selectedSlot = (this.selectedSlot + 1) % 9;
+      } else if (e.deltaY < 0) {
+        this.selectedSlot = (this.selectedSlot - 1 + 9) % 9;
+      }
+    }, { passive: true });
   }
 
   triggerSwing() {
@@ -111,23 +125,33 @@ export class LocalPlayer extends Player {
     const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
 
     const moveDir = new THREE.Vector3();
-    if (this.keys.forward) moveDir.add(forward);
-    if (this.keys.backward) moveDir.sub(forward);
-    if (this.keys.right) moveDir.add(right);
-    if (this.keys.left) moveDir.sub(right);
+    if (this.touchMoveVector && (Math.abs(this.touchMoveVector.x) > 0.01 || Math.abs(this.touchMoveVector.y) > 0.01)) {
+      moveDir.addScaledVector(forward, this.touchMoveVector.y);
+      moveDir.addScaledVector(right, this.touchMoveVector.x);
+    } else {
+      if (this.keys.forward) moveDir.add(forward);
+      if (this.keys.backward) moveDir.sub(forward);
+      if (this.keys.right) moveDir.add(right);
+      if (this.keys.left) moveDir.sub(right);
+    }
 
     if (moveDir.lengthSq() > 0.001) {
       moveDir.normalize();
-      const speed = this.keys.sprint ? 7.2 : 4.8;
+      const speedMult = this.speedMultiplier || (this.teamManager?.gameManager?.mutationManager?.getSpeedMultiplier?.() || 1.0);
+      let speed = (this.keys.sprint ? 7.2 : 4.8) * speedMult;
+      if (this.isSneaking) {
+        speed *= 0.55;
+      }
       this.velocity.x = moveDir.x * speed;
       this.velocity.z = moveDir.z * speed;
-      if (this.onGround) this.walkCycle += dt * (this.keys.sprint ? 14 : 10);
+      if (this.onGround) this.walkCycle += dt * (this.keys.sprint ? 14 : 10) * speedMult;
     }
 
     // 2. Jumping
-    if (this.keys.jump && this.onGround) {
+    if ((this.keys.jump || this.touchJump) && this.onGround) {
       this.velocity.y = 8.5;
       this.onGround = false;
+      this.touchJump = false;
     }
 
     // 3. Apply physics

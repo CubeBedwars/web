@@ -1,12 +1,15 @@
 import { GameManager } from './game/GameManager.js';
+import { PortalUI } from './ui/PortalUI.js';
 import { BLOCK_TYPES } from './engine/VoxelWorld.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const game = new GameManager();
+  const portal = new PortalUI(game);
+  game.portal = portal;
 
   // 1. Main Menu Play Actions
   document.getElementById('btn-play-solo')?.addEventListener('click', () => {
-    game.startMatch('solo', true);
+    game.startMatch('solo', true, 'solo');
   });
 
   document.getElementById('btn-play-rush')?.addEventListener('click', () => {
@@ -141,12 +144,13 @@ window.addEventListener('DOMContentLoaded', () => {
   // 5. Game Over Rematch Actions
   document.getElementById('btn-gameover-rematch')?.addEventListener('click', () => {
     document.getElementById('gameover-overlay')?.classList.add('hidden');
-    game.startMatch('solo', true);
+    game.startMatch(game.matchFormat || 'solo', true, game.matchFormat || 'solo');
   });
 
   document.getElementById('btn-gameover-menu')?.addEventListener('click', () => {
     document.getElementById('gameover-overlay')?.classList.add('hidden');
     game.hud.hide();
+    portal.update();
     document.getElementById('main-menu')?.classList.remove('hidden');
   });
 });

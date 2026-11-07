@@ -7,9 +7,11 @@ export class ParticleSystem {
     this.boxGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
   }
 
-  spawnBlockBreak(pos, colorHex = 0xffffff, count = 12) {
-    const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+  spawnBlockBreak(pos, colorHex = 0xffffff, count = 14) {
+    const colors = Array.isArray(colorHex) ? colorHex : [colorHex];
     for (let i = 0; i < count; i++) {
+      const col = colors[Math.floor(Math.random() * colors.length)];
+      const mat = new THREE.MeshBasicMaterial({ color: col });
       const mesh = new THREE.Mesh(this.boxGeo, mat);
       mesh.position.set(
         pos.x + 0.5 + (Math.random() - 0.5) * 0.8,
@@ -79,3 +81,6 @@ export class ParticleSystem {
     this.particles = [];
   }
 }
+
+export { ParticleSystem as ParticleManager };
+

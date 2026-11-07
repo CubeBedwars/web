@@ -1,0 +1,13 @@
+{
+  "name": "voxel-bedwars-server",
+  "version": "1.0.0",
+  "description": "Dedicated WebSocket multiplayer and healthcheck service for Voxel Bedwars",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
